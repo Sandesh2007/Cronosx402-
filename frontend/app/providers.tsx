@@ -3,7 +3,6 @@
 import { PrivyProvider } from "@privy-io/react-auth";
 import { CopilotKit } from "@copilotkit/react-core";
 import { ReactNode } from "react";
-import { MovementWalletModal } from "./components/movement-wallet-modal";
 
 interface ProvidersProps {
   children: ReactNode;
@@ -25,33 +24,31 @@ export function Providers({ children }: ProvidersProps) {
       appId={appId}
       clientId={clientId}
       config={{
-        // Disable automatic wallet creation - users will create wallets manually (e.g., Movement wallets)
         embeddedWallets: {
           ethereum: {
-            createOnLogin: "off", // Disable automatic Ethereum wallet creation
+            createOnLogin: "off",
           },
-          showWalletUIs: false, // Hide Privy's default wallet UIs
+          showWalletUIs: false,
         },
-        // Configure Movement blockchain (EVM-compatible)
         supportedChains: [
           {
-            id: 2024, // Movement mainnet chain ID
-            name: "Movement",
-            network: "movement",
+            id: 25, // Cronos mainnet chain ID
+            name: "Cronos",
+            network: "cronos",
             nativeCurrency: {
-              name: "MOV",
-              symbol: "MOV",
+              name: "CRO",
+              symbol: "CRO",
               decimals: 18,
             },
             rpcUrls: {
               default: {
-                http: ["https://mainnet.movementlabs.xyz"],
+                http: ["https://evm.cronos.org"],
               },
             },
             blockExplorers: {
               default: {
-                name: "Movement Explorer",
-                url: "https://explorer.movementlabs.xyz",
+                name: "Cronos Explorer",
+                url: "https://cronoscan.com",
               },
             },
           },
@@ -65,7 +62,6 @@ export function Providers({ children }: ProvidersProps) {
         publicApiKey={copilotApiKey}
       >
         {children}
-        <MovementWalletModal />
       </CopilotKit>
     </PrivyProvider>
   );

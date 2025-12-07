@@ -37,7 +37,7 @@ clean:
 # Docker commands
 docker-build:
 	@echo "Building Docker image..."
-	docker build -t movement-backend .
+	docker build -t cronos-x402-backend .
 
 docker-up:
 	@echo "Starting Docker containers..."

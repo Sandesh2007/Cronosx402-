@@ -221,7 +221,7 @@ Both services will be available:
 
 ### Infrastructure
 - **Balance Agent** - Multi-chain cryptocurrency balance checking
-- **Bridge Agent** - Cross-chain asset bridging via Movement Bridge
+- **Bridge Agent** - Cross-chain asset bridging via Cronos Bridge
 
 ### Trading
 - **OrderBook Agent** - ClobX DEX trading (limit/market orders)

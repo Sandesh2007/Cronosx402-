@@ -9,7 +9,7 @@ Next.js frontend for Cronos x402 Paytech, featuring CopilotKit-powered AI chat i
 - 🤖 **AI Chat Interface**: CopilotKit-powered conversational UI
 - 🎯 **Multi-Agent Access**: Interact with 9 specialized agents through natural language
 - 🔐 **Privy Authentication**: Secure wallet connection and user management
-- 🌐 **Cronos Integration**: Native support for Movement blockchain
+- 🌐 **Cronos Integration**: Native support for Cronos blockchain
 - ⚡ **Real-time Updates**: Live agent responses and status updates
 - 🎨 **Modern UI**: Tailwind CSS with dark mode support
 
@@ -66,4 +66,4 @@ Access these agents through the chat interface:
 - [Next.js Documentation](https://nextjs.org/docs)
 - [CopilotKit Documentation](https://docs.copilotkit.ai)
 - [Privy Documentation](https://docs.privy.io)
-- [Cronos](https://movementlabs.xyz)
+- [Cronos](https://cronos.org)

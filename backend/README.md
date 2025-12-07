@@ -49,8 +49,8 @@ make dev
 
 Build and run with Docker:
 ```bash
-docker build -t movement-backend .
-docker run -p 8000:8000 --env-file .env movement-backend
+docker build -t cronos-x402-backend .
+docker run -p 8000:8000 --env-file .env cronos-x402-backend
 ```
 
 Or use Docker Compose (recommended):

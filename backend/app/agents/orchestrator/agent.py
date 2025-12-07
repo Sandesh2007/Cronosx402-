@@ -88,7 +88,7 @@ orchestrator_agent = LlmAgent(
        - Can check ERC-20 token balances (USDC, USDT, DAI, etc.)
        - Requires wallet address (0x format) and optional network specification
 
-    2. **Bridge Agent** (LangGraph) - Cross-chain asset bridging via Movement Bridge
+    2. **Bridge Agent** (LangGraph) - Cross-chain asset bridging via Cronos Bridge
        - Bridges assets between Ethereum, BNB, Polygon and Cronos
        - Supports native tokens (ETH, BNB, MATIC) and ERC-20 tokens (USDC, USDT, DAI)
        - Can initiate bridge transactions, check status, and estimate fees

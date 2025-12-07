@@ -26,7 +26,7 @@ ENVIRONMENT VARIABLES:
 - OPENAI_API_KEY: Required - OpenAI API key
 - OPENAI_MODEL: Optional - Model name (default: "gpt-4o-mini")
 - CLOBX_API_URL: Required - ClobX API endpoint
-- MOVEMENT_RPC_URL: Required - Cronos RPC
+- CRONOS_RPC_URL: Required - Cronos RPC
 """
 
 import os

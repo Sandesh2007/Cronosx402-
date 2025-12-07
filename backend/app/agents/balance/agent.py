@@ -6,9 +6,9 @@ balances across multiple blockchain networks (Ethereum, BNB, Polygon, Cronos, et
 
 Cronos support:
 - Uses Cronos Indexer GraphQL API to fetch balances
-- Supports Aptos-compatible addresses (0x format)
-- Network parameter: "movement" or "aptos" (both work)
-- Fetches all fungible asset balances including native MOVE token
+- Supports Ethereum-compatible addresses (0x format)
+- Network parameter: "cronos"
+- Fetches all fungible asset balances including native CRO token
 
 ARCHITECTURE OVERVIEW:
 ----------------------
@@ -135,12 +135,11 @@ ENV_OPENAI_MODEL = "OPENAI_MODEL"
 ENV_CRONOS_INDEXER_URL = "CRONOS_INDEXER_URL"
 
 # Cronos Indexer constants
-SENTIO_INDEXER = "https://rpc.sentio.xyz/movement-indexer/v1/graphql"
-MOVEMENT_INDEXER_MAINNET = "https://indexer.mainnet.movementnetwork.xyz/v1/graphql"
-MOVEMENT_INDEXER_TESTNET = "https://indexer.testnet.movementnetwork.xyz/v1/graphql"
+CRONOS_INDEXER_MAINNET = "https://cronos.org/api/v1/graphql"
+CRONOS_INDEXER_TESTNET = "https://cronos.org/api/v1/graphql"
 
-# GraphQL query for Movement balances
-MOVEMENT_BALANCES_QUERY = """
+# GraphQL query for Cronos balances
+CRONOS_BALANCES_QUERY = """
 query GetUserTokenBalances($ownerAddress: String!) {
   current_fungible_asset_balances(
     where: {
@@ -183,19 +182,18 @@ def get_system_prompt() -> str:
     return """You are a helpful Web3 assistant specializing in checking cryptocurrency balances.
 
 When users ask about balances:
-1. Extract the wallet address if provided (format: 0x... or Aptos format)
+1. Extract the wallet address if provided (format: 0x...)
 2. Determine which network they're asking about:
-   - For Cronos: use "movement" or "aptos" (they are the same)
-   - Default to ethereum if not specified
-3. For token queries, identify the token symbol (USDC, USDT, DAI, MOVE, etc.)
+   - For Cronos: use "cronos"
+   - Default to cronos if not specified
+3. For token queries, identify the token symbol (USDC, USDT, DAI, CRO, etc.)
 4. Use the appropriate tool to fetch balance data
 5. Present results in a clear, user-friendly format
 
 Special handling for Cronos:
-- Cronos uses Aptos-compatible addresses
-- When user says "get my balance" or "give my balance" on Movement, use the wallet address they provided
-- Movement addresses can be in 0x format (Ethereum-style) or Aptos format - both work
-- The network parameter should be "movement" or "aptos" for Cronos
+- Cronos uses Ethereum-compatible addresses (0x format)
+- When user says "get my balance" or "give my balance" on Cronos, use the wallet address they provided
+- The network parameter should be "cronos"
 
 If the user doesn't provide an address, politely ask for it.
 Addresses should start with 0x and contain valid hexadecimal characters.
@@ -217,19 +215,17 @@ def create_agent_skill() -> AgentSkill:
     return AgentSkill(
         id="balance_agent",
         name="Balance Agent",
-        description="Balance Agent for checking crypto balances on multiple chains including Cronos",
-        tags=["balance", "ethereum", "bnb", "movement", "aptos", "web3", "crypto"],
+        description="Balance Agent for checking crypto balances on Cronos",
+        tags=["balance", "cronos", "web3", "crypto"],
         examples=[
             "get balance",
             "get my balance",
             "give my balance",
-            "get balance on movement",
-            "get balance on ethereum",
+            "get balance on cronos",
             "get balance of 0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb",
-            "get balance of usdc on bnb",
-            "get balance of usdc on ethereum",
+            "get balance of usdc on cronos",
             "check my USDT balance",
-            "get my balance on movement",
+            "get my balance on cronos",
         ],
     )
 
@@ -254,16 +250,16 @@ def create_agent_card(port: int) -> AgentCard:
     )
 
 
-def get_movement_indexer_url() -> str:
-    """Get Cronos Indexer URL from environment or default to Sentio.
+def get_cronos_indexer_url() -> str:
+    """Get Cronos Indexer URL from environment or default.
     
     Returns:
         Cronos Indexer GraphQL URL
     """
-    return os.getenv(ENV_CRONOS_INDEXER_URL, SENTIO_INDEXER)
+    return os.getenv(ENV_CRONOS_INDEXER_URL, CRONOS_INDEXER_MAINNET)
 
 
-def fetch_movement_balances(address: str) -> Dict[str, Any]:
+def fetch_cronos_balances(address: str) -> Dict[str, Any]:
     """Fetch balances from Cronos using the indexer API.
     
     Args:
@@ -273,10 +269,10 @@ def fetch_movement_balances(address: str) -> Dict[str, Any]:
         Dictionary with balance information
     """
     try:
-        indexer_url = get_movement_indexer_url()
+        indexer_url = get_cronos_indexer_url()
         variables = {"ownerAddress": address}
         payload = {
-            "query": MOVEMENT_BALANCES_QUERY,
+            "query": CRONOS_BALANCES_QUERY,
             "variables": variables,
         }
         headers = {
@@ -312,8 +308,8 @@ def fetch_movement_balances(address: str) -> Dict[str, Any]:
         }
 
 
-def format_movement_balance_response(balances_data: Dict[str, Any], address: str) -> str:
-    """Format Movement balance data into a user-friendly string.
+def format_cronos_balance_response(balances_data: Dict[str, Any], address: str) -> str:
+    """Format Cronos balance data into a user-friendly string.
     
     Args:
         balances_data: Dictionary with balance data from indexer
@@ -323,7 +319,7 @@ def format_movement_balance_response(balances_data: Dict[str, Any], address: str
         Formatted balance string
     """
     if not balances_data.get("success", False):
-        return f"Error fetching Movement balance: {balances_data.get('error', 'Unknown error')}"
+        return f"Error fetching Cronos balance: {balances_data.get('error', 'Unknown error')}"
     balances = balances_data.get("balances", [])
     if not balances:
         return f"Address {address} has no token balances on Cronos."
@@ -348,39 +344,39 @@ def format_movement_balance_response(balances_data: Dict[str, Any], address: str
 
 @tool
 def get_balance(address: str, network: str = DEFAULT_NETWORK) -> str:
-    """Get the balance of a cryptocurrency address on a specific network.
+    """Get the balance of a cryptocurrency address on Cronos.
 
     Args:
-        address: The cryptocurrency wallet address (0x... or Aptos format)
-        network: The blockchain network (ethereum, bnb, polygon, movement, aptos, etc.)
+        address: The cryptocurrency wallet address (0x... format)
+        network: The blockchain network (cronos)
 
     Returns:
         The balance as a string
     """
     network_lower = network.lower()
-    if network_lower in ["movement", "aptos"]:
-        balances_data = fetch_movement_balances(address)
-        return format_movement_balance_response(balances_data, address)
+    if network_lower in ["cronos"]:
+        balances_data = fetch_cronos_balances(address)
+        return format_cronos_balance_response(balances_data, address)
     return f"Balance for {address} on {network}: Not implemented yet (only Cronos is currently supported)"
 
 
 @tool
 def get_token_balance(address: str, token: str, network: str = DEFAULT_NETWORK) -> str:
-    """Get the balance of a specific token for an address on a network.
+    """Get the balance of a specific token for an address on Cronos.
 
     Args:
-        address: The cryptocurrency wallet address (0x... or Aptos format)
-        token: The token symbol (e.g., USDC, USDT, DAI, MOVE)
-        network: The blockchain network (ethereum, bnb, polygon, movement, aptos, etc.)
+        address: The cryptocurrency wallet address (0x... format)
+        token: The token symbol (e.g., USDC, USDT, DAI, CRO)
+        network: The blockchain network (cronos)
 
     Returns:
         The token balance as a string
     """
     network_lower = network.lower()
-    if network_lower in ["movement", "aptos"]:
-        balances_data = fetch_movement_balances(address)
+    if network_lower in ["cronos"]:
+        balances_data = fetch_cronos_balances(address)
         if not balances_data.get("success", False):
-            return f"Error fetching Movement balance: {balances_data.get('error', 'Unknown error')}"
+            return f"Error fetching Cronos balance: {balances_data.get('error', 'Unknown error')}"
         balances = balances_data.get("balances", [])
         token_upper = token.upper()
         for balance in balances:

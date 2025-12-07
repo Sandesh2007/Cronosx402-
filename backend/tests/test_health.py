@@ -12,7 +12,7 @@ def test_read_root() -> None:
     """Test root endpoint."""
     response = client.get("/")
     assert response.status_code == 200
-    assert response.json() == {"message": "Movement API"}
+    assert response.json() == {"message": "Cronos x402 API"}
 
 
 def test_health_check() -> None:

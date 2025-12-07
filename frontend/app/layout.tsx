@@ -15,7 +15,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Movement Nexus - AI-Powered DeFi Gateway",
+  title: "Cronos x402 - AI-Powered DeFi Gateway",
   description:
     "Multi-agent AI platform for seamless DeFi operations on Cronos",
   manifest: "/manifest.json",
@@ -23,7 +23,7 @@ export const metadata: Metadata = {
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
-    title: "Movement Nexus",
+    title: "Cronos x402",
   },
   formatDetection: {
     telephone: false,

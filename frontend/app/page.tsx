@@ -37,7 +37,7 @@ export default function Home() {
       <main className="flex w-full max-w-2xl flex-col items-center gap-8 py-32 px-16 bg-white dark:bg-black">
         <div className="flex flex-col items-center gap-6 text-center">
           <h1 className="max-w-md text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            Welcome to Movement
+            Welcome to Cronos x402
           </h1>
           <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
             Please sign in with your email to continue.

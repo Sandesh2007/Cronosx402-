@@ -2,7 +2,7 @@
 Bridge Agent - Cronos Cross-Chain Bridge Agent
 
 This module implements an AI-powered agent that helps users bridge assets
-between different blockchain networks using the Movement Bridge.
+between different blockchain networks using Cronos Bridge.
 
 ARCHITECTURE OVERVIEW:
 ----------------------
@@ -33,13 +33,13 @@ The agent follows the same multi-layered architecture as the Balance Agent:
 
 WORKFLOW:
 ---------
-1. User sends a query (e.g., "bridge 1 ETH from Ethereum to Movement")
+1. User sends a query (e.g., "bridge 1 ETH from Ethereum to Cronos")
 2. RequestContext captures the user input
 3. BridgeAgentExecutor.execute() is called
 4. BridgeAgent.invoke() processes the query:
    - Validates OpenAI API key
    - Invokes LangGraph agent with user query
-   - Agent uses tools to interact with Movement Bridge
+   - Agent uses tools to interact with Cronos Bridge
    - Extracts assistant response from agent result
 5. Response is formatted as JSON and sent back via EventQueue
 
@@ -54,9 +54,9 @@ ENVIRONMENT VARIABLES:
 ----------------------
 - OPENAI_API_KEY: Required - OpenAI API key for LLM access
 - OPENAI_MODEL: Optional - Model name (default: "gpt-4o-mini")
-- MOVEMENT_RPC_URL: Required - Cronos RPC endpoint
+- CRONOS_RPC_URL: Required - Cronos RPC endpoint
 - ETHEREUM_RPC_URL: Optional - Ethereum RPC endpoint
-- BRIDGE_CONTRACT_ADDRESS: Required - Movement Bridge contract address
+- BRIDGE_CONTRACT_ADDRESS: Required - Cronos Bridge contract address
 
 USAGE:
 ------
@@ -115,7 +115,7 @@ EMPTY_RESPONSE_MESSAGE = (
 # Environment variables
 ENV_OPENAI_API_KEY = "OPENAI_API_KEY"
 ENV_OPENAI_MODEL = "OPENAI_MODEL"
-ENV_MOVEMENT_RPC_URL = "MOVEMENT_RPC_URL"
+ENV_CRONOS_RPC_URL = "CRONOS_RPC_URL"
 ENV_BRIDGE_CONTRACT_ADDRESS = "BRIDGE_CONTRACT_ADDRESS"
 
 # Message types
@@ -138,7 +138,7 @@ ERROR_GENERIC_PREFIX = "I encountered an error while processing your request: "
 
 def get_system_prompt() -> str:
     """Get the system prompt for the agent."""
-    return """You are a helpful Web3 assistant specializing in cross-chain asset bridging using the Movement Bridge.
+    return """You are a helpful Web3 assistant specializing in cross-chain asset bridging using the Cronos Bridge.
 
 When users ask about bridging:
 1. Extract the source chain (ethereum, bnb, polygon, etc.)
@@ -174,11 +174,11 @@ def create_agent_skill() -> AgentSkill:
     return AgentSkill(
         id="bridge_agent",
         name="Bridge Agent",
-        description="Bridge Agent for cross-chain asset transfers via Movement Bridge",
-        tags=["bridge", "cross-chain", "movement", "ethereum", "transfer"],
+        description="Bridge Agent for cross-chain asset transfers via Cronos Bridge",
+        tags=["bridge", "cross-chain", "cronos", "ethereum", "transfer"],
         examples=[
-            "bridge 1 ETH from Ethereum to Movement",
-            "bridge 100 USDC from BNB to Movement",
+            "bridge 1 ETH from Ethereum to Cronos",
+            "bridge 100 USDC from BNB to Cronos",
             "check bridge status for transaction 0x...",
             "what are the fees to bridge 1 ETH?",
             "how long does bridging take?",
@@ -194,7 +194,7 @@ def create_agent_card(port: int) -> AgentCard:
         name="Bridge Agent",
         description=(
             "LangGraph powered agent that helps bridge assets "
-            "between chains using Movement Bridge"
+            "between chains using Cronos Bridge"
         ),
         url=card_url,
         version="1.0.0",
@@ -218,7 +218,7 @@ def initiate_bridge(
 
     Args:
         source_chain: The source blockchain (ethereum, bnb, polygon, etc.)
-        destination_chain: The destination blockchain (usually movement)
+        destination_chain: The destination blockchain (usually cronos)
         asset: The asset to bridge (ETH, USDC, USDT, etc.)
         amount: The amount to bridge (as string)
         recipient_address: The recipient address on destination chain (0x...)
@@ -226,7 +226,7 @@ def initiate_bridge(
     Returns:
         Transaction details as a string
     """
-    # TODO: Implement actual bridge initiation with Movement Bridge contract
+    # TODO: Implement actual bridge initiation with Cronos Bridge contract
     return json.dumps({
         "status": "initiated",
         "source_chain": source_chain,
@@ -271,7 +271,7 @@ def get_bridge_fees(
 
     Args:
         source_chain: The source blockchain (ethereum, bnb, polygon, etc.)
-        destination_chain: The destination blockchain (usually movement)
+        destination_chain: The destination blockchain (usually cronos)
         asset: The asset to bridge (ETH, USDC, USDT, etc.)
         amount: The amount to bridge (as string)
 
@@ -489,7 +489,7 @@ def create_bridge_agent_app(card_url: str) -> A2AStarletteApplication:
         name="Bridge Agent",
         description=(
             "LangGraph powered agent that helps bridge assets "
-            "between chains using Movement Bridge"
+            "between chains using Cronos Bridge"
         ),
         url=card_url,
         version="1.0.0",

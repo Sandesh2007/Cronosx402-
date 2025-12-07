@@ -64,7 +64,7 @@ export default function ChatPage() {
             </svg>
           </button>
           <span className="font-semibold text-zinc-900 dark:text-zinc-100">
-            Movement Nexus
+            Cronos x402
           </span>
           <button
             onClick={() => setIsRightSidebarOpen(true)}
@@ -99,7 +99,7 @@ export default function ChatPage() {
             className="h-full"
             instructions="You are a Web3 and cryptocurrency assistant. Help users with blockchain operations, balance checks, token swaps, and market analysis. Always be helpful and provide clear, actionable information."
             labels={{
-              title: "Movement Assistant",
+              title: "Cronos Assistant",
               initial: "Hi! 👋 How can I assist you today?",
             }}
           />
