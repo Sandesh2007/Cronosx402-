@@ -11,25 +11,25 @@ export function getConfig(): Partial<RuntimeConfig> & { loaded: boolean } {
 }
 
 /**
- * Get Movement API base URL
+ * Get Cronos API base URL
  * Returns undefined if not loaded yet
  */
-export function getMovementApiBase(): string | undefined {
-  return store.getState().config.movementApiBase;
+export function getCronosApiBase(): string | undefined {
+  return store.getState().config.cronosApiBase;
 }
 
 /**
- * Get Movement RPC URL
+ * Get Cronos RPC URL
  */
-export function getMovementRpc(): string | undefined {
-  return store.getState().config.movementRpc;
+export function getCronosRpc(): string | undefined {
+  return store.getState().config.cronosRpc;
 }
 
 /**
- * Get Movement Chain ID
+ * Get Cronos Chain ID
  */
-export function getMovementChainId(): number | undefined {
-  return store.getState().config.movementChainId;
+export function getCronosChainId(): number | undefined {
+  return store.getState().config.cronosChainId;
 }
 
 /**
@@ -39,16 +39,16 @@ export function getMosaicApiBase(): string | undefined {
   return store.getState().config.mosaicApiBaseUrl;
 }
 
-export function getMovementLabsUrl(): string | undefined {
-  return store.getState().config.movementLabsUrl;
+export function getCronosLabsUrl(): string | undefined {
+  return store.getState().config.cronosLabsUrl;
 }
 
-export function getMovementExplorerUrl(): string | undefined {
-  return store.getState().config.movementExplorerUrl;
+export function getCronosExplorerUrl(): string | undefined {
+  return store.getState().config.cronosExplorerUrl;
 }
 
-export function getMovementPositionBrokerUrl(): string | undefined {
-  return store.getState().config.movementPositionBrokerUrl;
+export function getCronosPositionBrokerUrl(): string | undefined {
+  return store.getState().config.cronosPositionBrokerUrl;
 }
 
 /**
@@ -62,7 +62,7 @@ export function isConfigLoaded(): boolean {
  * Get config value with error if not loaded
  * Throws error if config not loaded - use when config is required
  */
-export function requireMovementApiBase(): string {
+export function requireCronosApiBase(): string {
   const config = store.getState().config;
 
   if (!config.loaded) {
@@ -71,53 +71,53 @@ export function requireMovementApiBase(): string {
     );
   }
 
-  if (!config.movementApiBase) {
-    throw new Error("movementApiBase is not configured");
+  if (!config.cronosApiBase) {
+    throw new Error("cronosApiBase is not configured");
   }
 
-  return config.movementApiBase;
+  return config.cronosApiBase;
 }
 
-export function requireMovementRpc(): string {
+export function requireCronosRpc(): string {
   const config = store.getState().config;
 
   if (!config.loaded) {
     throw new Error("Config not loaded yet");
   }
 
-  if (!config.movementRpc) {
-    throw new Error("movementRpc is not configured");
+  if (!config.cronosRpc) {
+    throw new Error("cronosRpc is not configured");
   }
 
-  return config.movementRpc;
+  return config.cronosRpc;
 }
 
-export function requireMovementChainId(): number {
+export function requireCronosChainId(): number {
   const config = store.getState().config;
 
   if (!config.loaded) {
     throw new Error("Config not loaded yet");
   }
 
-  if (config.movementChainId == null) {
-    throw new Error("movementChainId is not configured");
+  if (config.cronosChainId == null) {
+    throw new Error("cronosChainId is not configured");
   }
 
-  return config.movementChainId;
+  return config.cronosChainId;
 }
 
-export function movementTestNetChainId(): number {
+export function cronosTestNetChainId(): number {
   const config = store.getState().config;
 
   if (!config.loaded) {
     throw new Error("Config not loaded yet");
   }
 
-  if (config.movementTestNetChainId == null) {
-    throw new Error("movementChainId is not configured");
+  if (config.cronosTestNetChainId == null) {
+    throw new Error("cronosChainId is not configured");
   }
 
-  return config.movementTestNetChainId;
+  return config.cronosTestNetChainId;
 }
 
 export function requireConfig(): Required<RuntimeConfig> {
@@ -128,13 +128,13 @@ export function requireConfig(): Required<RuntimeConfig> {
   }
 
   if (
-    !config.movementApiBase ||
-    !config.movementRpc ||
-    !config.movementChainId ||
-    !config.movementTestNetChainId ||
+    !config.cronosApiBase ||
+    !config.cronosRpc ||
+    !config.cronosChainId ||
+    !config.cronosTestNetChainId ||
     !config.mosaicApiBaseUrl ||
-    !config.movementLabsUrl ||
-    !config.movementExplorerUrl
+    !config.cronosLabsUrl ||
+    !config.cronosExplorerUrl
   ) {
     throw new Error("Config is incomplete");
   }
