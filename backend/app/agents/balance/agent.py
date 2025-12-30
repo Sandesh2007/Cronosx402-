@@ -197,9 +197,12 @@ def get_system_prompt() -> str:
 
 When users ask about balances:
 1. Extract the wallet address:
-   - If user says "my balance", "fetch my balance", "check my balance", etc., the orchestrator will provide the connected wallet address
-   - If user provides a specific address (format: 0x...), use that address
-   - If no address is provided and user doesn't say "my balance", politely ask for it
+   - If the user explicitly provides a wallet address (format: 0x...), use that address
+   - If the user says "my balance", "fetch my balance", "check my balance", "get my balance", etc.:
+     * Check the conversation context for a connected wallet address
+     * If a connected wallet address is found in context, automatically use it
+     * If no connected wallet is in context, politely ask the user for their wallet address
+   - Always prioritize user-provided addresses over context addresses
 2. Determine which network they're asking about:
    - For Cronos: use "cronos"
    - Default to "cronos" if not specified
@@ -209,11 +212,13 @@ When users ask about balances:
 
 Special handling for Cronos:
 - Cronos uses Ethereum-compatible addresses (0x format)
+- Default network is "cronos" for this application
+- When user says "get my balance" or similar, automatically use connected wallet if available in context
 - The network parameter should be "cronos"
-- When user refers to "my balance" or "my wallet", the address will be provided by the orchestrator
 
-Addresses should start with 0x and contain valid hexadecimal characters.
-If there's an error, explain it clearly and suggest alternatives."""
+Address validation:
+- Addresses should start with 0x and contain valid hexadecimal characters
+- If there's an error, explain it clearly and suggest alternatives."""
 
 
 def get_port() -> int:
@@ -474,64 +479,82 @@ def fetch_cronos_balances(address: str) -> Dict[str, Any]:
         address_data = ethereum_data.get("address", [])
         
         if not address_data:
+            # Address not found or has never had any activity - return zero balance
             return {
                 "address": address,
-                "balances": [],
+                "balances": [{
+                    "currency": {"name": "Cronos", "symbol": "CRO"},
+                    "value": "0",
+                    "symbol": "CRO",
+                    "name": "Cronos",
+                    "decimals": 18,
+                    "contract": "",
+                    "is_native": True,
+                }],
                 "success": True,
-                "total_fetched": 0,
+                "total_fetched": 1,
                 "filtered_out": 0,
             }
         
         address_info = address_data[0]
-        native_balance = address_info.get("balance", "0")
-        balances_list = address_info.get("balances", [])
+        # Handle case where balance might be None, missing, or empty string
+        native_balance = address_info.get("balance")
+        if native_balance is None or native_balance == "":
+            native_balance = "0"
+        balances_list = address_info.get("balances", []) or []
         
         # Transform Bitquery format to our standard format
         formatted_balances = []
         
-        # Add native CRO balance first if > 0
-        if native_balance and native_balance != "0":
-            try:
-                # Bitquery returns native balance in different formats:
-                # - As decimal string (e.g., "24827.849010682339425216") - already in CRO units
-                # - As integer string in wei (e.g., "24827849010682339425216") - in smallest units
-                # We need to detect the format and convert to wei (smallest units) for storage
-                native_balance_str = str(native_balance).strip()
-                
-                if '.' in native_balance_str:
-                    # Already in decimal format (CRO units), convert to wei
-                    # Use Decimal for precision with large numbers
-                    native_balance_decimal = Decimal(native_balance_str)
-                    if native_balance_decimal > 0:
-                        # Convert from CRO to wei (multiply by 10^18)
-                        wei_multiplier = Decimal(10) ** 18
-                        native_balance_wei = int(native_balance_decimal * wei_multiplier)
-                        formatted_balances.append({
-                            "currency": {"name": "Cronos", "symbol": "CRO"},
-                            "value": str(native_balance_wei),
-                            "symbol": "CRO",
-                            "name": "Cronos",
-                            "decimals": 18,
-                            "contract": "",
-                            "is_native": True,
-                        })
-                else:
-                    # Already in wei (smallest units), use as-is
-                    native_balance_int = int(native_balance_str)
-                    if native_balance_int > 0:
-                        formatted_balances.append({
-                            "currency": {"name": "Cronos", "symbol": "CRO"},
-                            "value": str(native_balance_int),
-                            "symbol": "CRO",
-                            "name": "Cronos",
-                            "decimals": 18,
-                            "contract": "",
-                            "is_native": True,
-                        })
-            except (ValueError, TypeError) as e:
-                # Log the error for debugging but don't fail completely
-                print(f"Error parsing native balance '{native_balance}': {e}")
-                pass
+        # Always add native CRO balance (even if 0) so users can see their balance status
+        try:
+            # Bitquery returns native balance in different formats:
+            # - As decimal string (e.g., "24827.849010682339425216") - already in CRO units
+            # - As integer string in wei (e.g., "24827849010682339425216") - in smallest units
+            # - May be "0", "0.0", or None if balance is zero
+            # We need to detect the format and convert to wei (smallest units) for storage
+            native_balance_str = str(native_balance).strip() if native_balance else "0"
+            
+            if '.' in native_balance_str:
+                # Already in decimal format (CRO units), convert to wei
+                # Use Decimal for precision with large numbers
+                native_balance_decimal = Decimal(native_balance_str)
+                # Convert from CRO to wei (multiply by 10^18), even if 0
+                wei_multiplier = Decimal(10) ** 18
+                native_balance_wei = int(native_balance_decimal * wei_multiplier)
+                formatted_balances.append({
+                    "currency": {"name": "Cronos", "symbol": "CRO"},
+                    "value": str(native_balance_wei),
+                    "symbol": "CRO",
+                    "name": "Cronos",
+                    "decimals": 18,
+                    "contract": "",
+                    "is_native": True,
+                })
+            else:
+                # Already in wei (smallest units), use as-is (even if 0)
+                native_balance_int = int(native_balance_str) if native_balance_str else 0
+                formatted_balances.append({
+                    "currency": {"name": "Cronos", "symbol": "CRO"},
+                    "value": str(native_balance_int),
+                    "symbol": "CRO",
+                    "name": "Cronos",
+                    "decimals": 18,
+                    "contract": "",
+                    "is_native": True,
+                })
+        except (ValueError, TypeError) as e:
+            # If parsing fails, default to 0 balance
+            print(f"Error parsing native balance '{native_balance}': {e}, defaulting to 0")
+            formatted_balances.append({
+                "currency": {"name": "Cronos", "symbol": "CRO"},
+                "value": "0",
+                "symbol": "CRO",
+                "name": "Cronos",
+                "decimals": 18,
+                "contract": "",
+                "is_native": True,
+            })
         
         # Add token balances
         for balance in balances_list:
@@ -606,15 +629,21 @@ def fetch_cronos_balances(address: str) -> Dict[str, Any]:
             "filtered_out": len(formatted_balances) - len(filtered_balances),
         }
     except requests.exceptions.RequestException as e:
+        error_msg = f"Request error: {str(e)}"
+        print(f"Balance fetch request error for {address}: {error_msg}")
         return {
             "address": address,
-            "error": f"Request error: {str(e)}",
+            "error": error_msg,
             "success": False,
         }
     except Exception as e:
+        error_msg = f"Unexpected error: {str(e)}"
+        print(f"Balance fetch unexpected error for {address}: {error_msg}")
+        import traceback
+        traceback.print_exc()
         return {
             "address": address,
-            "error": str(e),
+            "error": error_msg,
             "success": False,
         }
 
@@ -632,9 +661,39 @@ def format_cronos_balance_response(balances_data: Dict[str, Any], address: str) 
     if not balances_data.get("success", False):
         return f"Error fetching Cronos balance: {balances_data.get('error', 'Unknown error')}"
     balances = balances_data.get("balances", [])
-    if not balances:
-        return f"Address {address} has no token balances on Cronos."
-    result_lines = [f"Cronos balances for {address}:\n"]
+    
+    # Always show at least native CRO balance (even if 0)
+    # Check if we have any balances, or if all balances are zero
+    has_non_zero_balance = False
+    native_balance_shown = False
+    
+    for balance in balances:
+        if balance.get("is_native", False):
+            native_balance_shown = True
+        value = balance.get("value", "0")
+        try:
+            if int(value) > 0:
+                has_non_zero_balance = True
+                break
+        except (ValueError, TypeError):
+            pass
+    
+    # If no balances returned or no native balance shown, create a default zero balance response
+    if not balances or not native_balance_shown:
+        result_lines = [f"Cronos balances for {address}:\n"]
+        result_lines.append("1. Cronos (CRO)")
+        result_lines.append("   Type: Native CRO")
+        result_lines.append("   Balance: 0.000000 CRO")
+        result_lines.append("\n✅ Balance check successful. This address has 0 CRO and no token balances.")
+        return "\n".join(result_lines)
+    
+    # If we have balances but all are zero, show them anyway with a clear message
+    if not has_non_zero_balance:
+        result_lines = [f"Cronos balances for {address}:\n"]
+        result_lines.append("✅ Balance check successful. All balances are currently 0:")
+        result_lines.append("")
+    else:
+        result_lines = [f"Cronos balances for {address}:\n"]
     for idx, balance in enumerate(balances, 1):
         value = balance.get("value", "0")
         symbol = balance.get("symbol", "Unknown")
